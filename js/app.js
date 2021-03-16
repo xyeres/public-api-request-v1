@@ -68,8 +68,14 @@ function showModal(email) {
     gallery.insertAdjacentHTML('beforeend', html);
 
     // Initialize modalBtns
-    let index = personList.indexOf(person[0]);
+    checkIndex(personList.indexOf(person[0]));
+    
+    // Close modal switch
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+    modalCloseBtn.addEventListener('click', closeModal);
+}
 
+function checkIndex(index) {
     if (index - 1 < 0) {
         modalBtns(0, 1);
     } else if (index + 1 > personList.length-1) {
@@ -77,11 +83,6 @@ function showModal(email) {
     } else {
         modalBtns(index - 1, index + 1);
     }
-    
-    
-    // Close modal switch
-    const modalCloseBtn = document.getElementById('modal-close-btn');
-    modalCloseBtn.addEventListener('click', closeModal);
 }
 
 function modalBtns(prevIndex, nextIndex) {
@@ -89,7 +90,7 @@ function modalBtns(prevIndex, nextIndex) {
     const prev = document.getElementById('modal-prev');
     const next = document.getElementById('modal-next');
     
-    next.style = "background: rgba(255, 255, 255, 1); color: rgba(25, 25, 25, 1);";
+    // next.style = "background: rgba(255, 255, 255, 1); color: rgba(25, 25, 25, 1);";
     
     prev.addEventListener('click', (e) =>{
         closeModal();
