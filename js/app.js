@@ -1,7 +1,9 @@
 const users = 'https://randomuser.me/api/?nat=us&inc=picture,name,email,location,cell,address,dob&results=12'
 const gallery = document.getElementById('gallery');
 let personList = [];
-/*  Data Wrangling Functions    */
+/*  
+    Data Wrangling Functions
+    */
 
 // Async/Await Version of Fetch
 async function asyncJSON(url) {
@@ -41,13 +43,13 @@ function xhrJSON(url) {
 
 // Operations
 fetchJSON(users)
-    .then(buildCards)
+    .then(data => buildCards(data.results))
+    .then(buildSearch)
+    .then(handleSearch)
     .then(data => {
-        personList = [...data.results]
+        personList = [...data]
     })
-    .then(addCardEventHandler)
     .catch(err => console.log(err))
-
 
 /* Helper Functions  */
 function checkStatus(res) {
@@ -58,68 +60,57 @@ function checkStatus(res) {
     }
 }
 
-// Populate Modal //
-const perPage = 1;
-
-function showModal(list, page) {
-    // Gallery is our target html container
-    console.log('page ', page);
-    const startIndex = (page * perPage) - perPage;
-    console.log('startIndex ', startIndex);
-    const endIndex = page * perPage;
-    console.log('endIndex ', endIndex);
-
-    const modalDiv = document.createElement('div');
-    modalDiv.id = 'modal';
-    gallery.appendChild(modalDiv);
-    // modalDiv.innerHTML = '';
-
-    list.forEach((person, i, array) => {
-        if (i > startIndex && i <= endIndex) {
-            modalDiv.insertAdjacentHTML('beforeend', buildHTML(person));
-        }
-    })
-    // Initialize modalBtns
-    checkIndex(page);
-    // Close modal switch
-    const modalCloseBtn = document.getElementById('modal-close-btn');
-    modalCloseBtn.addEventListener('click', (e) => {
-        closeModal();
-    });
-                     
-}
-
-function checkIndex(index) {
-    if (index - 1 < 0) {
-        modalBtns(0, 1);
-    } else if (index + 1 > personList.length-1) {
-        modalBtns(index - 1, index)
-    } else {
-        modalBtns(index - 1, index + 1);
-    }
-}
-
-function modalBtns(prevIndex, nextIndex) {
-    // Setup prev/next btns
-    const prev = document.getElementById('modal-prev');
-    const next = document.getElementById('modal-next');
-    
-    // next.style = "background: rgba(255, 255, 255, 1); color: rgba(25, 25, 25, 1);";
-    
-    prev.addEventListener('click', (e) =>{
-        closeModal();
-        showModal(personList, prevIndex);
-    })
-    next.addEventListener('click', (e) =>{
-        closeModal();
-        showModal(personList, nextIndex);
-    })
-}
-
+// Remove the modal div
 function closeModal() {
     document.getElementById('modal').remove();
 }
+/*
+    S E A R C H
 
+    */
+
+function buildSearch(list) {
+    const searchContainer = document.querySelector('.search-container');
+    const searchHtml = `<form action="#" method="get">
+        <input type="search" id="search-input" class="search-input" placeholder="Search...">
+        <input type="submit" value="&#x1F50D;" id="search-submit" class="search-submit">
+        </form>`;
+    searchContainer.insertAdjacentHTML('beforeend', searchHtml);
+    return Promise.resolve(list);
+};
+
+function handleSearch(list) {
+    const searchBtn = document.querySelector('#search-submit');
+    const searchInput = document.querySelector('#search-input');
+    function searchEvent(e) {
+        e.preventDefault();
+        let searchResults = searchPeople(list, searchInput);
+        buildCards(searchResults)
+    } 
+    searchBtn.addEventListener('click', searchEvent);
+    searchInput.addEventListener('keyup', searchEvent);
+    return Promise.resolve(list);
+}
+
+/***
+ * `searchPeople` takes input field and a list,
+ * returns: array of search results
+ ***/
+function searchPeople(list, input) {
+    return searchList = filterItems(list, input.value)
+    // Adapeted from MDN filter documentation
+    // https://developer.mozilla.org/en-US/docs/web/javascript/reference/global_objects/array/filter
+    function filterItems(arr, query) {
+        return arr.filter(function(el) {
+            return el.name.first.toLowerCase().indexOf(query.toLowerCase()) !== -1
+                || el.name.last.toLowerCase().indexOf(query.toLowerCase()) !== -1
+        })
+    }
+}
+// Handle search submit
+
+
+// Build the modal for a person
 function buildHTML(person) {
     return `
     <div class="modal-container">
@@ -143,12 +134,64 @@ function buildHTML(person) {
     </div>`
 }
 
+// Populate Modal //
 
-/*  Build Cards for Gallery
-    Takes an array of people objects and populates html cards 
+function showModal(list, index) {
+    // Gallery is our target html container
+    const perPage = 1;
+    const prevIndex = (index * perPage) - perPage;
+    const nextIndex = (index * perPage) + 1;
+    const modalDiv = document.createElement('div');
+
+    modalDiv.id = 'modal';
+    gallery.appendChild(modalDiv);
+
+    list.forEach((person, i) => {
+        if (i > prevIndex && i < nextIndex) {
+            modalDiv.insertAdjacentHTML('beforeend', buildHTML(person));
+        }
+    })
+
+    // Initialize modalBtns
+    modalBtns(list, prevIndex, nextIndex);
+}
+
+function modalBtns(list, prevIndex, nextIndex) {
+    const btnContainer = document.querySelector('.modal-btn-container');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+
+    // Close modal button
+    modalCloseBtn.addEventListener('click', (e) => {
+        closeModal();
+    });
+
+    // Next and Prev Buttons
+    btnContainer.addEventListener('click', (e) => {
+        // Close currently open modal
+        closeModal();
+        // Handle next and prev logic
+        if (prevIndex === -1) {
+            prevIndex += 1;
+        }
+        if (nextIndex > list.length - 1) {
+            nextIndex -= 1;
+        }
+        if (e.target.textContent === 'Prev') {
+            showModal(list, prevIndex);
+        } else {
+            showModal(list, nextIndex);
+        }
+    })
+}
+
+/*  
+    Build Cards for Gallery
+    Takes an array and populates html cards with each array items data 
 */
 function buildCards(data) {
-    data.results.map(person => {
+    gallery.innerHTML = '';
+
+    data.map(person => {
         html = `
         <div class="card" data-person="${person.email}">
                 <div class="card-img-container">
@@ -164,18 +207,18 @@ function buildCards(data) {
         // Insert Gallery HTML
         gallery.insertAdjacentHTML('beforeend', html);
     });
+    addCardEventHandler(data);
     return Promise.resolve(data);
 }
 
-
-// Event Listeners
-function addCardEventHandler() {
-    const cards = document.querySelectorAll('.card') 
+// Add Event Listeners to Cards
+function addCardEventHandler(list) {
+    const cards = document.querySelectorAll('.card')
     cards.forEach(card => {
         card.addEventListener('click', (e) => {
             let clickedPerson = card.dataset.person;
-            let person = personList.filter(x => x.email === clickedPerson);
-            showModal(personList, personList.indexOf(person[0]));
+            let person = list.filter(x => x.email === clickedPerson);
+            showModal(list, list.indexOf(person[0]));
         })
-    })    
+    })
 }
