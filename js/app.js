@@ -107,8 +107,6 @@ function searchPeople(list, input) {
         })
     }
 }
-// Handle search submit
-
 
 // Build the modal for a person
 function buildHTML(person) {
@@ -122,9 +120,9 @@ function buildHTML(person) {
             <p class="modal-text">${person.email}</p>
             <p class="modal-text cap">${person.location.city}</p>
             <hr>
-            <p class="modal-text">${person.cell}</p>
-            <p class="modal-text">${person.location.street.number} ${person.location.street.name}, ${person.location.city}, ${person.location.state.slice(0, 2).toUpperCase()} ${person.location.postcode}</p>
-            <p class="modal-text">Birthday: ${person.dob.date}</p>
+            <p class="modal-text">${formatTel(person.cell)}</p>
+            <p class="modal-text">${person.location.street.number} ${person.location.street.name}, ${person.location.city}, ${person.location.state} ${person.location.postcode}</p>
+            <p class="modal-text">Birthday: ${formatDOB(person.dob.date)}</p>
             </div>
         </div>
         <div class="modal-btn-container">
@@ -132,6 +130,19 @@ function buildHTML(person) {
         <button type="button" id="modal-next" class="modal-next btn">Next</button>
     </div>
     </div>`
+
+    function formatTel(tel) {
+        let f3 = tel.slice(0,5);
+        let s3 = tel.slice(6, 9);
+        let l3 = tel.slice(10,14);
+        return `${f3} ${s3}-${l3}`;
+    }
+    function formatDOB(dob) {
+        let month = dob.slice(5, 7);
+        let day = dob.slice(11, 13);
+        let year = dob.slice(0, 4);
+        return `${month}/${day}/${year}`;
+    }
 }
 
 // Populate Modal //
