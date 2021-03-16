@@ -59,20 +59,34 @@ function checkStatus(res) {
 }
 
 // Populate Modal //
-function showModal(email) {
-    let person = personList.filter(x => x.email === email);
-    
-    console.log(personList.indexOf(person[0]));
-    
-    let html = buildHTML(person[0]);
-    gallery.insertAdjacentHTML('beforeend', html);
+const perPage = 1;
 
+function showModal(list, page) {
+    // Gallery is our target html container
+    console.log('page ', page);
+    const startIndex = (page * perPage) - perPage;
+    console.log('startIndex ', startIndex);
+    const endIndex = page * perPage;
+    console.log('endIndex ', endIndex);
+
+    const modalDiv = document.createElement('div');
+    modalDiv.id = 'modal';
+    gallery.appendChild(modalDiv);
+    // modalDiv.innerHTML = '';
+
+    list.forEach((person, i, array) => {
+        if (i > startIndex && i <= endIndex) {
+            modalDiv.insertAdjacentHTML('beforeend', buildHTML(person));
+        }
+    })
     // Initialize modalBtns
-    checkIndex(personList.indexOf(person[0]));
-    
+    checkIndex(page);
     // Close modal switch
     const modalCloseBtn = document.getElementById('modal-close-btn');
-    modalCloseBtn.addEventListener('click', closeModal);
+    modalCloseBtn.addEventListener('click', (e) => {
+        closeModal();
+    });
+                     
 }
 
 function checkIndex(index) {
@@ -94,21 +108,21 @@ function modalBtns(prevIndex, nextIndex) {
     
     prev.addEventListener('click', (e) =>{
         closeModal();
-        showModal(personList[prevIndex].email);
+        showModal(personList, prevIndex);
     })
     next.addEventListener('click', (e) =>{
         closeModal();
-        showModal(personList[nextIndex].email);
+        showModal(personList, nextIndex);
     })
 }
 
 function closeModal() {
-    document.getElementById('modal').remove()
+    document.getElementById('modal').remove();
 }
 
 function buildHTML(person) {
     return `
-    <div class="modal-container" id="modal">
+    <div class="modal-container">
         <div class="modal">
             <button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
             <div class="modal-info-container">
@@ -159,8 +173,9 @@ function addCardEventHandler() {
     const cards = document.querySelectorAll('.card') 
     cards.forEach(card => {
         card.addEventListener('click', (e) => {
-            let person = card.dataset.person;
-            showModal(person)
+            let clickedPerson = card.dataset.person;
+            let person = personList.filter(x => x.email === clickedPerson);
+            showModal(personList, personList.indexOf(person[0]));
         })
     })    
 }
