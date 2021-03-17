@@ -34,7 +34,7 @@ function checkStatus(res) {
 
 // Remove the modal div
 function closeModal() {
-    // const modal = document.getElementById('modal');
+    const modal = document.getElementById('modal');
     modal.remove();
 }
 /*
