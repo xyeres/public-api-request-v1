@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Ajax Boiler</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    
+</head>
+<body>
+    <button id="clickMe">GET SHIT DONE!</button>
+    <div id="ajax">
+
+    </div>
+    <script type='text/javascript'>
+        // 1: Create XHR object
+        var xhr = new XMLHttpRequest();
+        // 2: Callback function (business logic)
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    document.getElementById('ajax').innerHTML = xhr.responseText;
+                } else {
+                    document.getElementById('ajax').innerHTML = xhr.statusText;
+                }
+            }
+        };
+        // 3: Open the request
+        xhr.open('GET', 'hi.html');
+
+        // 4: Send the request
+        const btn = document.getElementById('clickMe');
+        btn.addEventListener('click', () => xhr.send());
+    </script>
+</body>
+</html>
