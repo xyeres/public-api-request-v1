@@ -5,40 +5,12 @@ let personList = [];
     Data Wrangling Functions
     */
 
-// Async/Await Version of Fetch
-async function asyncJSON(url) {
-    try {
-        const response = await fetch(url);
-        return response.json();
-    }
-    catch (err) {
-        console.log('there was an error getting data: ', err)
-    }
-}
-
 // Fetch API Version
 function fetchJSON(url) {
     return fetch(url)
         .then(checkStatus)
         .then(res => res.json())
         .catch(err => console.log('There was a problem fetching from the API ', err))
-}
-
-// XHR Version of API Request
-function xhrJSON(url) {
-    const xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = () => {
-        if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-                const data = JSON.parse(xhr.responseText);
-                console.log(data.results)
-            } else {
-                console.log('An error occured: ', xhr.statusText)
-            }
-        }
-    };
-    xhr.open('GET', url);
-    xhr.send();
 }
 
 // Operations
@@ -62,7 +34,8 @@ function checkStatus(res) {
 
 // Remove the modal div
 function closeModal() {
-    document.getElementById('modal').remove();
+    // const modal = document.getElementById('modal');
+    modal.remove();
 }
 /*
     S E A R C H
@@ -86,6 +59,14 @@ function handleSearch(list) {
         e.preventDefault();
         let searchResults = searchPeople(list, searchInput);
         buildCards(searchResults)
+
+        // If no results, display friendly message to user
+        if (searchResults.length === 0) {
+            const h3 = document.createElement('h3');
+            h3.style.color = 'white';
+            h3.textContent = 'Sorry, no results match your query';
+            gallery.appendChild(h3);
+        }
     } 
     searchBtn.addEventListener('click', searchEvent);
     searchInput.addEventListener('keyup', searchEvent);
@@ -109,7 +90,7 @@ function searchPeople(list, input) {
 }
 
 // Build the modal for a person
-function buildHTML(person) {
+function buildModalHTML(person) {
     return `
     <div class="modal-container">
         <div class="modal">
@@ -155,14 +136,13 @@ function showModal(list, index) {
     const modalDiv = document.createElement('div');
 
     modalDiv.id = 'modal';
-    gallery.appendChild(modalDiv);
+    document.querySelector('body').appendChild(modalDiv);
 
     list.forEach((person, i) => {
         if (i > prevIndex && i < nextIndex) {
-            modalDiv.insertAdjacentHTML('beforeend', buildHTML(person));
+            modalDiv.insertAdjacentHTML('beforeend', buildModalHTML(person));
         }
     })
-
     // Initialize modalBtns
     modalBtns(list, prevIndex, nextIndex);
 }
@@ -226,6 +206,7 @@ function buildCards(data) {
 function addCardEventHandler(list) {
     const cards = document.querySelectorAll('.card')
     cards.forEach(card => {
+        card.style.backgroundColor = '#99BFBB';
         card.addEventListener('click', (e) => {
             let clickedPerson = card.dataset.person;
             let person = list.filter(x => x.email === clickedPerson);
@@ -233,3 +214,16 @@ function addCardEventHandler(list) {
         })
     })
 }
+// Style adjustments and customizations
+document.addEventListener('DOMContentLoaded', () =>{
+    // Header styling
+    const h1 = document.querySelector('h1');
+    h1.style.color = 'white';
+    h1.style.fontSize = '1.7em';
+    h1.style.fontFamily = "'Josefin Sans', sans-serif";
+
+    // Body styling
+    const body = document.querySelector('body');
+    // body.style.backgroundImage = 'linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%)';
+    body.style.backgroundColor = '#0D2C40';
+})
